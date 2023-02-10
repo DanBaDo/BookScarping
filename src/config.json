@@ -1,0 +1,18 @@
+{
+    "bookLists": [
+        {
+            "name": "Catálogo de títulos do Club de Lectura de Galicia",
+            "URL": "https://catalogo-rbgalicia.xunta.gal/cgi-bin/koha/opac-shelves.pl?op=view&shelfnumber=267"
+
+        },
+        {
+            "name": "Catálogo de títulos de Lectura Fácil do Club de Lectura de Galicia",
+            "URL": "https://catalogo-rbgalicia.xunta.gal/cgi-bin/koha/opac-shelves.pl?op=view&shelfnumber=5189"
+        }
+    ],
+    "paginationQueryParams": {
+        "page": 0,
+        "sortfield": "title",
+        "direction": "asc"
+    }
+}
