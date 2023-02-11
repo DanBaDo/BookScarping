@@ -28,52 +28,56 @@ function booksDivsFromListDocument(document) {
 }
 
 function pagesURLsFromListDocument(document, baseURLString) {
+
   const pagesURL = []
-  
-  const lastPageNumber = new URL(document.querySelector("a[rel='last']").href)
-    .searchParams
-    .get("page")
+  let lastPageNumber = parseInt(
+    new URLSearchParams(document.querySelector("a[rel='last']").href).get("page")
+  )
 
   while ( lastPageNumber > 0 ) {
-    const paginationQueryParameters = new URLSearchParams(config.paginationQueryParams).set("page", lastPageNumber)
+    const paginationQueryParameters = new URLSearchParams(config.paginationQueryParams)
+    paginationQueryParameters.set("page", lastPageNumber)
     const baseURL = new URL(baseURLString)
-    baseURL.search += paginationQueryParameters
+    baseURL.search += "&"+paginationQueryParameters.toString()
     pagesURL.unshift(
-      baseURL.toString
+      baseURL.toString()
     )
     lastPageNumber--
   }
 
+  return pagesURL
+
 }
 
 function imageFromBookDiv(bookDiv) {
-  return bookDiv.querySelector("div.coverimages img")
+  return bookDiv.querySelector("div.coverimages img").src
 }
 
 function titleFromBookDiv(bookDiv) {
-  bookDiv.querySelector("a.title").innerText
+  return bookDiv.querySelector("a.title").innerHTML.trim()
 }
 
 function bookURLFromBookDiv(bookDiv) {
-  bookDiv.querySelector("a.title").href
+  return bookDiv.querySelector("a.title").href
 }
 
 function authorNameFromBookDiv(bookDiv) {
-  const nameStrings = bookDiv.querySelector("a.author").innerText.split(" ")
+  const nameStrings = bookDiv.querySelector("a.author").innerHTML.split(", ")
   return {
-    name: nameStrings[1],
-    surname: nameStrings[0]
+    name: nameStrings[1].trim(),
+    surname: nameStrings[0].trim()
   }
 }
 
 function authorURLFromBookDiv(bookDiv) {
-  bookDiv.querySelector("a.author").href
+  return bookDiv.querySelector("a.author").href
 }
 
 module.exports = {
   htmlFromURL,
   domFromHTML,
-  booksDivsFromDocument: booksDivsFromListDocument,
+  pagesURLsFromListDocument,
+  booksDivsFromListDocument,
   imageFromBookDiv,
   titleFromBookDiv,
   bookURLFromBookDiv,
