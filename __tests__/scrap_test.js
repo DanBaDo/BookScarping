@@ -91,9 +91,6 @@ describe("bookFromBookDiv",()=>{
     test("Chech first book author URL",()=>{
         expect(book).toHaveProperty("author.URL","/cgi-bin/koha/opac-search.pl?q=au:Funke,%20Cornelia%20")
     })
-    test("Chech first book author URL",()=>{
-        expect(book).toHaveProperty("author.URL","/cgi-bin/koha/opac-search.pl?q=au:Funke,%20Cornelia%20")
-    })
     test("Chech first book image",()=>{
         expect(book).toHaveProperty("image","//dixirep.qlees.es/application/GetImage.php?img=Zo9z1NHazNDXdtim3p3TrdjF4Mrek3mlaZlnkXma0d7J1Nm01HCfcJl4opytmaSagK5l0qjI")
     })
