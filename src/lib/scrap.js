@@ -1,6 +1,8 @@
 const puppeteer = require('puppeteer');
 const jsdom = require('jsdom');
 
+const { Author, Book } = require("../types.js")
+
 const config = require("../config.json")
 
 async function htmlFromURL(url) {
@@ -73,6 +75,19 @@ function authorURLFromBookDiv(bookDiv) {
   return bookDiv.querySelector("a.author").href
 }
 
+function bookFromBookDiv(bookDiv) {
+  return new Book(
+      titleFromBookDiv(bookDiv),
+      new Author(
+        authorNameFromBookDiv(bookDiv).name,
+        authorNameFromBookDiv(bookDiv).surname,
+        authorURLFromBookDiv(bookDiv)
+      ),
+      imageFromBookDiv(bookDiv),
+      bookURLFromBookDiv(bookDiv)
+    )
+}
+
 module.exports = {
   htmlFromURL,
   domFromHTML,
@@ -82,5 +97,6 @@ module.exports = {
   titleFromBookDiv,
   bookURLFromBookDiv,
   authorNameFromBookDiv,
-  authorURLFromBookDiv
+  authorURLFromBookDiv,
+  bookFromBookDiv
 }
