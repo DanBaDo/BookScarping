@@ -88,6 +88,10 @@ function bookFromBookDiv(bookDiv) {
     )
 }
 
+function booksFromListURL(listURL) {
+
+}
+
 module.exports = {
   htmlFromURL,
   domFromHTML,
@@ -98,5 +102,6 @@ module.exports = {
   bookURLFromBookDiv,
   authorNameFromBookDiv,
   authorURLFromBookDiv,
-  bookFromBookDiv
+  bookFromBookDiv,
+  booksFromListURL
 }

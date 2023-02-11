@@ -10,7 +10,8 @@ const {
     authorNameFromBookDiv,
     bookURLFromBookDiv,
     authorURLFromBookDiv,
-    bookFromBookDiv
+    bookFromBookDiv,
+    booksFromListURL
 } = require("../src/lib/scrap")
 
 const bookListHTML = fs.readFileSync('__tests__/booksListHTML.html',
@@ -41,37 +42,37 @@ describe("booksDivsFromListDocument",()=>{
 
 describe("titleFromBookDiv",()=>{
     const title = titleFromBookDiv(bookDiv)
-    test("Check first book title is ¡Apártate de Mississippi!",()=>{
+    test("Check first div title",()=>{
         expect(title).toBe("¡Apártate de Mississippi!    / Cornelia Funke ; ilustraciones de la autora ; traducción de Rosa Pilar Blanco.")
     })
 })
 
 describe("imageFromBookDiv",()=>{
     const image = imageFromBookDiv(bookDiv)
-    test("Check first image URL",()=>{
+    test("Check first div image URL",()=>{
         expect(image).toBe("//dixirep.qlees.es/application/GetImage.php?img=Zo9z1NHazNDXdtim3p3TrdjF4Mrek3mlaZlnkXma0d7J1Nm01HCfcJl4opytmaSagK5l0qjI")
     })
 })
 
 describe("authorNameFromBookDiv",()=>{
     const author = authorNameFromBookDiv(bookDiv)
-    test("Check first author name",()=>{
+    test("Check first div author name",()=>{
         expect(author).toHaveProperty("name","Cornelia")
     })
-    test("Check first author surnmae",()=>{
+    test("Check first div author surnmae",()=>{
         expect(author).toHaveProperty("surname","Funke")
     })
 })
 
 describe("bookURLFromBookDiv",()=>{
-    test("Check first book URL",()=>{
+    test("Check first div book URL",()=>{
         const url = bookURLFromBookDiv(bookDiv)
         expect(url).toBe("/cgi-bin/koha/opac-detail.pl?biblionumber=750105")
     })
 })
 
 describe("authorURLFromBookDiv",()=>{
-    test("Check first book author URL",()=>{
+    test("Check first div author URL",()=>{
         const url = authorURLFromBookDiv(bookDiv)
         expect(url).toBe("/cgi-bin/koha/opac-search.pl?q=au:Funke,%20Cornelia%20")
     })
@@ -96,5 +97,15 @@ describe("bookFromBookDiv",()=>{
     })
     test("Chech first book URL",()=>{
         expect(book).toHaveProperty("URL","/cgi-bin/koha/opac-detail.pl?biblionumber=750105")
+    })
+})
+
+describe("booksFromListURL",()=>{
+    const books = booksFromListURL(config.bookLists[0].URL)
+    test("Check if there are 20 books",()=>{
+        expect(books.length).toEqual(20)
+    })
+    test("Check first array element is a Book",()=>{
+        expect(books[0]).toBeInstanceOf(Book)
     })
 })
