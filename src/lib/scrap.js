@@ -1,14 +1,12 @@
 const puppeteer = require('puppeteer');
 const jsdom = require('jsdom');
 
-const { Author, Book } = require("../types.js")
-
-const config = require("../config.json")
+const config = require("../config.json");
+const { Book, Author } = require('../types');
 
 async function htmlFromURL(url) {
-
   // Prepara browser
-  const browser = await puppeteer.launch() ;
+  const browser = await puppeteer.launch();
   const page = await browser.newPage();
   // Get document
   const response = await page.goto(url);
@@ -17,7 +15,6 @@ async function htmlFromURL(url) {
   browser.close();
 
   return HTML;
-
 }
 
 function domFromHTML(html) {
@@ -32,8 +29,12 @@ function booksDivsFromListDocument(document) {
 function pagesURLsFromListDocument(document, baseURLString) {
 
   const pagesURL = []
+
   let lastPageNumber = parseInt(
-    new URLSearchParams(document.querySelector("a[rel='last']").href).get("page")
+    new URLSearchParams(
+      document.querySelector("a[rel='last']")
+      .href
+    ).get("page")
   )
 
   while ( lastPageNumber > 0 ) {
@@ -52,44 +53,58 @@ function pagesURLsFromListDocument(document, baseURLString) {
 }
 
 function imageFromBookDiv(bookDiv) {
-  return bookDiv.querySelector("div.coverimages img").src
+  return bookDiv.querySelector("div.coverimages img")?.src
 }
 
 function titleFromBookDiv(bookDiv) {
-  return bookDiv.querySelector("a.title").innerHTML.trim()
+  return bookDiv.querySelector("a.title")?.innerHTML
+    .trim()
 }
 
 function bookURLFromBookDiv(bookDiv) {
-  return bookDiv.querySelector("a.title").href
+  return bookDiv.querySelector("a.title")?.href
 }
 
 function authorNameFromBookDiv(bookDiv) {
-  const nameStrings = bookDiv.querySelector("a.author").innerHTML.split(", ")
-  return {
-    name: nameStrings[1].trim(),
-    surname: nameStrings[0].trim()
-  }
+  return bookDiv.querySelector("a.author")?.innerHTML
+    .split(", ")[1]
+    .trim()
+}
+
+function authorSurnameFromBookDiv(bookDiv) {
+  return bookDiv.querySelector("a.author")?.innerHTML
+    .split(", ")[0]
+    .trim()
 }
 
 function authorURLFromBookDiv(bookDiv) {
-  return bookDiv.querySelector("a.author").href
+  return bookDiv.querySelector("a.author")?.href
 }
 
-function bookFromBookDiv(bookDiv) {
+function authorFromBookDiv(bookDiv){
+  return new Author(
+    authorNameFromBookDiv(bookDiv),
+    authorSurnameFromBookDiv(bookDiv),
+    authorURLFromBookDiv(bookDiv)
+  )
+}
+
+function bookFromBookDiv(bookDiv){
   return new Book(
-      titleFromBookDiv(bookDiv),
-      new Author(
-        authorNameFromBookDiv(bookDiv).name,
-        authorNameFromBookDiv(bookDiv).surname,
-        authorURLFromBookDiv(bookDiv)
-      ),
-      imageFromBookDiv(bookDiv),
-      bookURLFromBookDiv(bookDiv)
-    )
+    titleFromBookDiv(bookDiv),
+    authorFromBookDiv(bookDiv),
+    imageFromBookDiv(bookDiv),
+    bookURLFromBookDiv(bookDiv)
+  )
 }
 
-function booksFromListURL(listURL) {
-
+async function booksFromListURL(listURL) {
+  const books = [];
+  const HTML = await htmlFromURL(listURL)
+  const document = domFromHTML(HTML)
+  const bookDivs = booksDivsFromListDocument(document)
+  bookDivs.forEach(div => books.push(bookFromBookDiv(div)))
+  return books
 }
 
 module.exports = {
@@ -101,7 +116,9 @@ module.exports = {
   titleFromBookDiv,
   bookURLFromBookDiv,
   authorNameFromBookDiv,
+  authorSurnameFromBookDiv,
   authorURLFromBookDiv,
+  authorFromBookDiv,
   bookFromBookDiv,
   booksFromListURL
 }

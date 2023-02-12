@@ -2,22 +2,34 @@ const fs = require('fs');
 const config = require("../src/config.json")
 
 const {
+    htmlFromURL,
     domFromHTML,
     pagesURLsFromListDocument,
     booksDivsFromListDocument,
     titleFromBookDiv,
     imageFromBookDiv,
     authorNameFromBookDiv,
-    bookURLFromBookDiv,
+    authorSurnameFromBookDiv,
     authorURLFromBookDiv,
+    bookURLFromBookDiv,
+    authorFromBookDiv,
     bookFromBookDiv,
     booksFromListURL
-} = require("../src/lib/scrap")
+} = require("../src/lib/scrap");
 
-const bookListHTML = fs.readFileSync('__tests__/booksListHTML.html',
-            {encoding:'utf8', flag:'r'});
-const document = domFromHTML(bookListHTML)
-const bookDiv = document.querySelector("td.bibliocol")
+const { bookListHTML, document, firstBookDiv, HTTPServerFactory } = require("../src/lib/tests_aux");
+const { Author, Book } = require('../src/types');
+
+/*
+test("Get HTML from URL", async ()=>{
+    const HTMLDocument = "It works!"
+    const HTTPServer = HTTPServerFactory(HTMLDocument)
+    HTTPServer.listen(8000)
+    const HTML = await htmlFromURL("http://localhost:8000")
+    expect(HTML).toBe(HTMLDocument)
+    HTTPServer.close()
+})
+*/
 
 test("Get dom from HTML", ()=>{
     expect(domFromHTML(bookListHTML).constructor.name).toBe("Document")
@@ -41,71 +53,70 @@ describe("booksDivsFromListDocument",()=>{
 })
 
 describe("titleFromBookDiv",()=>{
-    const title = titleFromBookDiv(bookDiv)
+    const title = titleFromBookDiv(firstBookDiv)
     test("Check first div title",()=>{
         expect(title).toBe("¡Apártate de Mississippi!    / Cornelia Funke ; ilustraciones de la autora ; traducción de Rosa Pilar Blanco.")
     })
 })
 
 describe("imageFromBookDiv",()=>{
-    const image = imageFromBookDiv(bookDiv)
+    const image = imageFromBookDiv(firstBookDiv)
     test("Check first div image URL",()=>{
         expect(image).toBe("//dixirep.qlees.es/application/GetImage.php?img=Zo9z1NHazNDXdtim3p3TrdjF4Mrek3mlaZlnkXma0d7J1Nm01HCfcJl4opytmaSagK5l0qjI")
     })
 })
 
 describe("authorNameFromBookDiv",()=>{
-    const author = authorNameFromBookDiv(bookDiv)
+    const name = authorNameFromBookDiv(firstBookDiv)
     test("Check first div author name",()=>{
-        expect(author).toHaveProperty("name","Cornelia")
-    })
-    test("Check first div author surnmae",()=>{
-        expect(author).toHaveProperty("surname","Funke")
+        expect(name).toBe("Cornelia")
     })
 })
 
-describe("bookURLFromBookDiv",()=>{
-    test("Check first div book URL",()=>{
-        const url = bookURLFromBookDiv(bookDiv)
-        expect(url).toBe("/cgi-bin/koha/opac-detail.pl?biblionumber=750105")
+describe("authorSurnameFromBookDiv",()=>{
+    const surname = authorSurnameFromBookDiv(firstBookDiv)
+    test("Check first div author surnmae",()=>{
+        expect(surname).toBe("Funke")
     })
 })
 
 describe("authorURLFromBookDiv",()=>{
-    test("Check first div author URL",()=>{
-        const url = authorURLFromBookDiv(bookDiv)
-        expect(url).toBe("/cgi-bin/koha/opac-search.pl?q=au:Funke,%20Cornelia%20")
+    const URL = authorURLFromBookDiv(firstBookDiv)
+    test("Check first div book URL",()=>{
+        expect(URL).toBe("/cgi-bin/koha/opac-search.pl?q=au:Funke,%20Cornelia%20")
+    })
+})
+
+describe("authorFromBookDiv",()=>{
+    test("Instance author from book div",()=>{
+        const author = authorFromBookDiv(firstBookDiv)
+        expect(author).toBeInstanceOf(Author)
     })
 })
 
 describe("bookFromBookDiv",()=>{
-    const book = bookFromBookDiv(bookDiv)
-    test("Chech first book title",()=>{
-        expect(book).toHaveProperty("title","¡Apártate de Mississippi!    / Cornelia Funke ; ilustraciones de la autora ; traducción de Rosa Pilar Blanco.")
-    })
-    test("Chech first book author name",()=>{
-        expect(book).toHaveProperty("author.name","Cornelia")
-    })
-    test("Chech first book author surname",()=>{
-        expect(book).toHaveProperty("author.surname","Funke")
-    })
-    test("Chech first book author URL",()=>{
-        expect(book).toHaveProperty("author.URL","/cgi-bin/koha/opac-search.pl?q=au:Funke,%20Cornelia%20")
-    })
-    test("Chech first book image",()=>{
-        expect(book).toHaveProperty("image","//dixirep.qlees.es/application/GetImage.php?img=Zo9z1NHazNDXdtim3p3TrdjF4Mrek3mlaZlnkXma0d7J1Nm01HCfcJl4opytmaSagK5l0qjI")
-    })
-    test("Chech first book URL",()=>{
-        expect(book).toHaveProperty("URL","/cgi-bin/koha/opac-detail.pl?biblionumber=750105")
+    test("Instance book from book div",()=>{
+        const book = bookFromBookDiv(firstBookDiv)
+        expect(book).toBeInstanceOf(Book)
     })
 })
 
-describe("booksFromListURL",()=>{
-    const books = booksFromListURL(config.bookLists[0].URL)
-    test("Check if there are 20 books",()=>{
+describe("booksFromListURL", ()=>{
+    let HTTPServer
+    beforeEach(() => {
+        HTTPServer = HTTPServerFactory(bookListHTML)
+        HTTPServer.listen(8000)
+    });
+    afterEach(() => {
+        HTTPServer.close()
+    });
+    test("Check if there are 20 books", async ()=>{
+        const books = await booksFromListURL("http://localhost:8000")
         expect(books.length).toEqual(20)
     })
-    test("Check first array element is a Book",()=>{
+    test("Check that at least first element is a book", async ()=>{
+        const books = await booksFromListURL("http://localhost:8000")
         expect(books[0]).toBeInstanceOf(Book)
     })
 })
+
